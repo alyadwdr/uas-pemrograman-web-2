@@ -43,7 +43,7 @@ async function saveProduct() {
   _productsCache = null; // reset cache
   closeAddProduct();
   renderInventory();
-  showToast('Produk ditambahkan ✨');
+  showToast('Produk ditambahkan');
 }
 
 async function deleteProduct(id) {
