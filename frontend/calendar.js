@@ -16,6 +16,12 @@ let   currentPopupDs = null;
 // Cache rutinitas per bulan: { 'YYYY-MM': [ ...rows ] }
 let _routineCache = {};
 
+// Konversi date dari DB ke string lokal (hindari timezone offset)
+function toLocalDate(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 function ds(y, m, d) {
   return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 }
@@ -76,7 +82,7 @@ async function renderCalendar(direction) {
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = ds(currentYear, currentMonth, d);
-    const dayRows = monthRows.filter(r => r.date.slice(0,10) === dateStr);
+    const dayRows = monthRows.filter(r => toLocalDate(r.date) === dateStr);
     if (dayRows.length === 0) continue;
 
     const morDone = morItems.every(item =>
@@ -132,7 +138,7 @@ function buildCalendarCells(grid, monthRows) {
     const isLocked = locks[dsKey];
 
     // Hitung progress dari cache bulan
-    const dayRows = (monthRows || []).filter(r => r.date.slice(0,10) === dsKey);
+    const dayRows = (monthRows || []).filter(r => toLocalDate(r.date) === dsKey);
     const total   = morItems.length + ngtItems.length;
     const done    = [...morItems.map(i => dayRows.some(r => r.session==='morning' && r.item_name===i && r.is_checked)),
                      ...ngtItems.map(i => dayRows.some(r => r.session==='night'   && r.item_name===i && r.is_checked))]
@@ -369,8 +375,8 @@ function renderPopupBody() {
   const sunIcon  = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>`;
   const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
-  body.appendChild(makeSection('morning', morDef, ' Pagi',   sunIcon));
-  body.appendChild(makeSection('night',   ngtDef, ' Malam', moonIcon));
+  body.appendChild(makeSection('morning', morDef, '☀️ Pagi',   sunIcon));
+  body.appendChild(makeSection('night',   ngtDef, '🌙 Malam', moonIcon));
 
   // Treatments
   if (treats.length > 0) {
@@ -398,7 +404,7 @@ function renderPopupBody() {
   const noteArea  = document.createElement('div');
   noteArea.className = 'popup-note-area';
   noteArea.innerHTML = `
-    <div class="popup-note-label"> Catatan hari ini</div>
+    <div class="popup-note-label">📝 Catatan hari ini</div>
     <textarea class="popup-note-textarea" id="dayNote"
       placeholder="Tulis catatan, reaksi kulit, dll..."
       ${locked ? 'disabled' : ''}>${savedNote}</textarea>
