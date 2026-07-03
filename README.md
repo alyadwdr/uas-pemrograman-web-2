@@ -1,6 +1,6 @@
-# Dear Skin - Skincare Tracker
+# 🌸 Dear Skin — Skincare Tracker
 
-Aplikasi web untuk membantu pengguna melacak rutinitas skincare harian, mengelola produk yang digunakan, dan memantau konsistensi perawatan kulit dari waktu ke waktu.
+Aplikasi web full-stack untuk membantu pengguna melacak rutinitas skincare harian, mengelola produk yang digunakan, dan memantau konsistensi perawatan kulit dari waktu ke waktu.
 
 ---
 
@@ -9,6 +9,33 @@ Aplikasi web untuk membantu pengguna melacak rutinitas skincare harian, mengelol
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Node.js, Express.js
 - **Database:** PostgreSQL
+
+---
+
+## Struktur Folder
+
+```
+uas-pemrograman-web-2/
+├── backend/
+│   ├── routes/
+│   │   ├── products.js
+│   │   └── routines.js
+│   ├── .env
+│   ├── db.js
+│   ├── index.js
+│   ├── package.json
+│   └── schema.sql
+├── frontend/
+│   ├── app.js
+│   ├── bg-pattern.js
+│   ├── calendar.js
+│   ├── index.html
+│   ├── inventory.js
+│   ├── settings.js
+│   └── style.css
+├── .gitignore
+└── README.md
+```
 
 ---
 
@@ -24,58 +51,81 @@ Pastikan sudah menginstal:
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/username/uas-pemrograman-web-2.git
+git clone https://github.com/alyadwdr/uas-pemrograman-web-2.git
 cd uas-pemrograman-web-2
 ```
 
 ### 2. Setup Database
 
-Buat database baru di PostgreSQL:
+Buka pgAdmin, lalu buat database baru bernama `dear_skin`. Setelah itu buka **Query Tool** dan jalankan isi file `backend/schema.sql`:
 
 ```sql
-CREATE DATABASE dear_skin;
+CREATE TABLE IF NOT EXISTS products (
+  id         SERIAL PRIMARY KEY,
+  name       VARCHAR(255) NOT NULL,
+  category   VARCHAR(100) NOT NULL,
+  note       TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS routines (
+  id           SERIAL PRIMARY KEY,
+  date         DATE NOT NULL,
+  session      VARCHAR(10) NOT NULL CHECK (session IN ('morning', 'night')),
+  item_name    VARCHAR(255) NOT NULL,
+  is_checked   BOOLEAN DEFAULT FALSE,
+  note         TEXT,
+  created_at   TIMESTAMP DEFAULT NOW(),
+  UNIQUE (date, session, item_name)
+);
 ```
 
-Lalu jalankan file migrasi (tersedia di folder `backend/db/`):
+### 3. Setup Backend
 
-```bash
-psql -U postgres -d dear_skin -f backend/db/schema.sql
-```
-
-### 3. Jalankan Backend
+Masuk ke folder backend:
 
 ```bash
 cd backend
-npm install
 ```
 
-Buat file `.env` di folder `backend/`:
+Buat file `.env` di dalam folder `backend/`:
 
 ```
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=dear_skin
 DB_USER=postgres
-DB_PASSWORD=your_password
+DB_PASSWORD=password_postgres_kamu
 PORT=3000
 ```
 
-Lalu jalankan server:
+Install dependencies:
 
 ```bash
-npm start
+npm install
+```
+
+Jalankan server:
+
+```bash
+npm run dev
 ```
 
 Server berjalan di `http://localhost:3000`
 
 ### 4. Jalankan Frontend
 
-Buka folder `frontend/`, lalu jalankan dengan live server (misalnya ekstensi Live Server di VS Code), atau langsung buka file `index.html` di browser.
+Buka VS Code, klik kanan file `frontend/index.html`, lalu pilih **Open with Live Server**.
+
+Aplikasi akan terbuka di browser secara otomatis.
 
 ---
 
 ## Fitur Utama
 
 - Kalender pelacak rutinitas skincare harian (pagi & malam)
-- Manajemen inventori produk skincare
-- Statistik konsistensi perawatan
+- Checklist item rutinitas yang tersimpan ke database
+- Manajemen inventori produk skincare per kategori
+- Treatment scheduler (jadwal perawatan berkala)
+- Kustomisasi default rutinitas & kategori produk
+- Background pattern yang bisa diganti-ganti
